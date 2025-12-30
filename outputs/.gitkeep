@@ -1,0 +1,4 @@
+# This directory contains generated outputs from the analysis.
+# - Competition predictions (CSV)
+# - Trained models (PKL)
+# - Results tables

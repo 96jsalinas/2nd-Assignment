@@ -1,0 +1,192 @@
+% Task 1: Simplified Exploratory Data Analysis
+% ============================================================================
+\section{Task 1: Simplified Exploratory Data Analysis}
+% ============================================================================
+
+This section presents the results of a simplified Exploratory Data Analysis (EDA) performed on the Bank Marketing dataset.
+
+\subsection{Dataset Overview}
+
+The Bank Marketing dataset contains information about direct marketing campaigns (phone calls) of a Portuguese banking institution. The goal is to predict whether a client will subscribe to a term deposit.
+
+\begin{table}[H]
+\centering
+\caption{Dataset Dimensions}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Number of instances & 11,000 \\
+Number of features & 16 \\
+Target variable & \texttt{deposit} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variable Types}
+
+Variables were classified based on their data types. Columns with \texttt{object} type are considered categorical, while numeric types (\texttt{int64}, \texttt{float64}) are considered numerical.
+
+\subsubsection{Numerical Variables (7)}
+\begin{itemize}
+    \item \texttt{age} -- age in years
+    \item \texttt{balance} -- average yearly balance
+    \item \texttt{day} -- last contact day
+    \item \texttt{duration} -- last contact duration in seconds
+    \item \texttt{campaign} -- number of contacts during this campaign
+    \item \texttt{pdays} -- days since last contact from previous campaign
+    \item \texttt{previous} -- number of contacts before this campaign
+\end{itemize}
+
+\subsubsection{Categorical Variables (10)}
+\begin{itemize}
+    \item \texttt{job} -- type of job (12 unique values)
+    \item \texttt{marital} -- marital status (3 unique values)
+    \item \texttt{education} -- education level (4 unique values)
+    \item \texttt{default} -- has credit in default (2 unique values)
+    \item \texttt{housing} -- has housing loan (2 unique values)
+    \item \texttt{loan} -- has personal loan (2 unique values)
+    \item \texttt{contact} -- contact communication type (3 unique values)
+    \item \texttt{month} -- last contact month (12 unique values)
+    \item \texttt{poutcome} -- outcome of previous campaign (4 unique values)
+    \item \texttt{deposit} -- target variable (2 unique values)
+\end{itemize}
+
+\subsubsection{High Cardinality Variables}
+
+Using a threshold of 10 unique values, the following categorical variables exhibit high cardinality:
+
+\begin{table}[H]
+\centering
+\caption{High Cardinality Categorical Variables}
+\begin{tabular}{lr}
+\toprule
+\textbf{Variable} & \textbf{Unique Values} \\
+\midrule
+\texttt{job} & 12 \\
+\texttt{month} & 12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These variables may require special encoding strategies (e.g., target encoding) in preprocessing, though standard one-hot encoding remains viable given the moderate cardinality.
+
+\subsection{Missing Values Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Columns with Missing Values}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Column} & \textbf{Missing Count} & \textbf{Percentage} \\
+\midrule
+\texttt{job} & 327 & 2.97\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Only the \texttt{job} column contains missing values, representing approximately 3\% of the data. This will require imputation during preprocessing, where the most frequent category or a separate ``missing'' category can be used.
+
+\subsection{Constant and ID Columns}
+
+The analysis checked for:
+\begin{itemize}
+    \item \textbf{Constant columns}: Columns where all values are identical (useless for prediction)
+    \item \textbf{Potential ID columns}: Columns where all values are unique (likely identifiers)
+\end{itemize}
+
+\textbf{Result}: No constant columns and no potential ID columns were found in the dataset. All features contain meaningful variation.
+
+\subsection{Problem Type Identification}
+
+\begin{table}[H]
+\centering
+\caption{Target Variable Analysis}
+\begin{tabular}{lr}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Target variable & \texttt{deposit} \\
+Data type & object (categorical) \\
+Unique values & 2 (yes, no) \\
+Problem type & \textbf{Binary Classification} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Class Imbalance}
+
+\begin{table}[H]
+\centering
+\caption{Class Distribution}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Class} & \textbf{Count} & \textbf{Percentage} \\
+\midrule
+no & 5,780 & 52.55\% \\
+yes & 5,220 & 47.45\% \\
+\midrule
+\textbf{Imbalance ratio} & \multicolumn{2}{c}{1.11} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dataset is \textbf{not imbalanced}. With an imbalance ratio of 1.11 (using a threshold of 1.5), the classes are well-balanced. This means we can use accuracy as an appropriate evaluation metric without requiring techniques like oversampling or class weighting.
+
+\subsection{Special Variable: pdays}
+
+The \texttt{pdays} variable requires special attention as it encodes two types of information:
+\begin{itemize}
+    \item \textbf{-1}: Client was not contacted in a previous campaign (or unknown)
+    \item \textbf{$\geq$ 0}: Number of days since the client was last contacted
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{pdays Analysis}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Total observations & 11,000 \\
+Values = -1 (no previous contact) & 8,203 (74.57\%) \\
+Values $>$ -1 (previous contact) & 2,797 (25.43\%) \\
+\midrule
+\multicolumn{2}{c}{\textit{Statistics for contacted clients only:}} \\
+Minimum & 1 days \\
+Maximum & 854 days \\
+Mean & 204.72 days \\
+Median & 182 days \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Preprocessing Alternatives}
+
+Three preprocessing strategies were considered for handling \texttt{pdays}:
+
+\begin{enumerate}
+    \item \textbf{Option A: Median Imputation}
+    \begin{itemize}
+        \item Replace -1 values with the median of valid pdays values (182 days)
+        \item \textit{Pros}: Simple, maintains single feature
+        \item \textit{Cons}: Loses information about whether contact occurred; may introduce misleading patterns
+    \end{itemize}
+    
+    \item \textbf{Option B: Large Value Replacement}
+    \begin{itemize}
+        \item Replace -1 with a large value (e.g., 999 or max+1 = 855)
+        \item \textit{Pros}: Simple, maintains single feature, distinguishes no-contact cases
+        \item \textit{Cons}: Arbitrary choice of replacement value; may affect distance-based methods
+    \end{itemize}
+    
+    \item \textbf{Option C: Two-Feature Approach (Selected)}
+    \begin{itemize}
+        \item Create binary indicator: \texttt{was\_contacted\_before} = 1 if pdays $\neq$ -1, else 0
+        \item Keep transformed \texttt{pdays} column (with -1 replaced by 0)
+        \item \textit{Pros}: Preserves maximum information; separates ``whether'' from ``when''
+        \item \textit{Cons}: Adds one feature; slightly more complex preprocessing
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Option C} was chosen because it preserves the maximum amount of information from the original variable. The binary flag captures whether a previous contact occurred (which is highly predictive), while the continuous value captures the recency of that contact for clients who were contacted.

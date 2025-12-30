@@ -1,0 +1,74 @@
+% Task 5: Open-Choice Task
+% ============================================================================
+\section{Task 5: Open-Choice Task (CatBoost)}
+% ============================================================================
+
+For the open-choice task, \textbf{CatBoost} was selected, a gradient boosting library developed by Yandex.
+
+\subsection{Justification}
+
+The selection of CatBoost was driven by the nature of the dataset's features:
+\begin{enumerate}
+    \item \textbf{Categorical Data Handling:} The dataset contains 10 categorical variables, including \texttt{job} (12 levels) and \texttt{month} (12 levels). Standard One-Hot Encoding (used in Task 3/4) increases dimensionality significantly (from 16 to 53 features). CatBoost handles categorical features natively using techniques like Ordered Target Statistics, which often preserves more information and reduces sparsity.
+    \item \textbf{Gradient Boosting:} Gradient Boosted Decision Trees (GBDT) generally outperform single Decision Trees (Task 4) by iteratively correcting errors of previous trees.
+    \item \textbf{Robustness:} CatBoost is known for performing well with default hyperparameters, reducing the need for extensive tuning.
+\end{enumerate}
+
+\subsection{Implementation}
+
+Unlike the scikit-learn pipeline used in previous tasks, the implementation for CatBoost involved:
+\begin{itemize}
+    \item \textbf{No One-Hot Encoding:} Categorical features were passed directly to the model as raw strings/objects.
+    \item \textbf{Pdays Transformation:} The same 2-feature transformation logic for \texttt{pdays} was applied manually to untangle the '-1' value.
+    \item \textbf{Missing Values:} \texttt{job} missing values were explicitly filled with 'unknown'.
+\end{itemize}
+
+The model was trained with the following configuration:
+\begin{itemize}
+    \item \textbf{Iterations:} 1000 (Early stopping at 50 rounds)
+    \item \textbf{Depth:} 6
+    \item \textbf{Learning Rate:} 0.05
+    \item \textbf{Loss Function:} Logloss (optimized for Accuracy)
+\end{itemize}
+
+\subsection{Results Evaluation}
+
+The CatBoost model was compared against the tuned Decision Tree from Task 4.
+
+\begin{table}[H]
+\centering
+\caption{Task 5: CatBoost Performance vs Baseline}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Metric} & \textbf{Decision Tree (Tuned)} & \textbf{CatBoost (Default)} & \textbf{Improvement} \\
+\midrule
+Accuracy & 82.95\% & \textbf{87.23\%} & +4.28\% \\
+Training Time & 4.27s & 7.41s & -3.14s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: CatBoost}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 991 & 165 \\
+\textbf{Actual Yes} & 116 & 928 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Analysis}
+The CatBoost model achieved a significant improvement over the best model from previous tasks.
+\begin{itemize}
+    \item \textbf{Accuracy:} Increased from 82.95\% to 87.23\%.
+    \item \textbf{Recall (Positive Class):} The most notable improvement is in detecting successful deposits. The Decision Tree correctly identified 841 positives, while CatBoost identified 928 (an increase of 87 true positives).
+    \item \textbf{False Negatives:} Missed opportunities dropped from 203 to 116.
+\end{itemize}
+
+\subsection{Conclusion}
+
+The selection of CatBoost was highly effective. The native handling of categorical features properly exploited the information in high-cardinality variables like 'job' and 'month' without the dilution caused by massive one-hot encoding. This demonstrates that for tabular data with mixed feature types, gradient boosting with specialized categorical handling is superior to single decision tree baselines.

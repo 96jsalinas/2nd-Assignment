@@ -1,0 +1,34 @@
+% Task 6: Feature Selection (Optional)
+% ============================================================================
+\section{Task 6: Feature Selection for KNN (Optional)}
+% ============================================================================
+
+In this optional task, it was explored whether the dimensionality of the dataset could be reduced without compromising the performance of the KNN model. The \texttt{SelectKBest} method combined with GridSearchCV was used to determine the optimal number of features.
+
+\subsection{Methodology}
+
+\begin{itemize}
+    \item \textbf{Feature Selection Method:} \texttt{SelectKBest} with the ANOVA F-value (\texttt{f\_classif}) scoring function.
+    \item \textbf{Model:} K-Nearest Neighbors Classifier with the optimal hyperparameters found in Task 3 ($k=11$, weights='distance', metric='euclidean').
+    \item \textbf{Search Strategy:} Grid Search over the parameter $k$ (number of features) ranging from 5 to 53.
+    \item \textbf{Preprocessing:} Standard One-Hot Encoding pipeline used in Task 2.
+\end{itemize}
+
+\subsection{Results}
+
+The Grid Search identified the following optimal configuration:
+
+\begin{itemize}
+    \item \textbf{Optimal Number of Features:} 53 (out of 53 total features).
+    \item \textbf{Test Accuracy with Selected Features:} 82.18\%
+\end{itemize}
+
+\paragraph{Analysis}
+The feature selection process determined that all 53 features should be retained:
+\begin{itemize}
+    \item \textbf{Dimensionality Reduction:} No reduction was achieved. The full feature set was identified as optimal by the grid search.
+    \item \textbf{Performance:} The test accuracy of 82.18\% is consistent with the full KNN model results from Task 3, as expected given that no features were removed.
+\end{itemize}
+
+\subsection{Conclusion}
+The feature selection process found that all features contribute to the KNN model's performance. This indicates that the preprocessing and feature engineering steps in Task 2 did not introduce redundant or noisy features relative to the distance-based learning of KNN.

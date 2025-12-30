@@ -1,0 +1,152 @@
+% Task 2: Outer and Inner Evaluation
+% ============================================================================
+\section{Task 2: Outer and Inner Evaluation}
+% ============================================================================
+
+\subsection{Evaluation Strategy Overview}
+
+The evaluation follows a two-level approach:
+\begin{enumerate}
+    \item \textbf{Outer Evaluation (Holdout):} A train/test split to estimate final model performance
+    \item \textbf{Inner Evaluation (Cross-Validation):} Used during hyperparameter tuning to avoid overfitting
+\end{enumerate}
+
+This nested approach ensures that the test set remains truly unseen until the final evaluation.
+
+\subsection{Target Variable Encoding}
+
+The target variable \texttt{deposit} contains string values ('yes' and 'no'). To ensure compatibility with scikit-learn models (especially K-Nearest Neighbors), these were encoded into numeric values using \texttt{LabelEncoder}:
+\begin{itemize}
+    \item \texttt{no} $\rightarrow$ 0
+    \item \texttt{yes} $\rightarrow$ 1
+\end{itemize}
+
+This encoding is performed prior to the train/test split to ensure consistency across all data subsets.
+
+\subsection{Outer Evaluation: Train/Test Split}
+
+\begin{table}[H]
+\centering
+\caption{Train/Test Split Configuration}
+\begin{tabular}{lr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Split ratio & 80\% train / 20\% test \\
+Training samples & 8,800 \\
+Test samples & 2,200 \\
+Stratification & Yes (on target variable) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The split uses \texttt{train\_test\_split} with \texttt{stratify=y} to maintain class proportions in both sets:
+
+\begin{table}[H]
+\centering
+\caption{Class Distribution After Split}
+\begin{tabular}{lrrrr}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Training Set}} & \multicolumn{2}{c}{\textbf{Test Set}} \\
+\textbf{Class} & Count & \% & Count & \% \\
+\midrule
+no & 4,624 & 52.55\% & 1,156 & 52.55\% \\
+yes & 4,176 & 47.45\% & 1,044 & 47.45\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Inner Evaluation Strategy}
+
+For hyperparameter tuning (Task 3), \texttt{StratifiedKFold} cross-validation is used:
+
+\begin{table}[H]
+\centering
+\caption{Cross-Validation Configuration}
+\begin{tabular}{lr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Strategy & StratifiedKFold \\
+Number of folds & 3 \\
+Shuffle & True \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Justification for StratifiedKFold:} While the dataset is fairly balanced, stratification ensures each fold maintains the same class proportions, leading to more reliable performance estimates during hyperparameter tuning.
+
+\subsection{Preprocessing Pipeline}
+
+All preprocessing is implemented using scikit-learn \texttt{Pipeline} and \texttt{ColumnTransformer} to ensure proper fit/transform separation and prevent data leakage.
+
+\begin{table}[H]
+\centering
+\caption{Preprocessing Steps by Feature Type}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature Type} & \textbf{Imputation} & \textbf{Transformation} \\
+\midrule
+Numerical (6 features) & Median & StandardScaler \\
+Categorical (10 features) & Most frequent & OneHotEncoder \\
+pdays (special) & Custom & Binary flag + scaled continuous \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Custom pdays Preprocessing}
+
+A custom \texttt{PdaysTransformer} was implemented to handle the \texttt{pdays} variable:
+
+\begin{lstlisting}[language=Python, caption=PdaysTransformer (Option C)]
+class PdaysTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self  # Stateless transformation
+    
+    def transform(self, X):
+        was_contacted = (X != -1).astype(int)
+        pdays_transformed = np.where(X == -1, 0, X)
+        return np.column_stack([was_contacted, 
+                                 pdays_transformed])
+\end{lstlisting}
+
+This creates two features from the original \texttt{pdays}:
+\begin{itemize}
+    \item \texttt{was\_contacted\_before}: Binary indicator (1 if previously contacted)
+    \item \texttt{pdays\_transformed}: Days since contact (with -1 replaced by 0)
+\end{itemize}
+
+\subsubsection{Feature Expansion}
+
+After preprocessing, the feature space expands due to one-hot encoding:
+
+\begin{table}[H]
+\centering
+\caption{Feature Dimensions}
+\begin{tabular}{lr}
+\toprule
+\textbf{Stage} & \textbf{Dimensions} \\
+\midrule
+Original features & 16 \\
+After preprocessing & 53 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Metrics}
+
+\subsubsection{Main Metric: Accuracy}
+Accuracy is appropriate as the main metric because:
+\begin{itemize}
+    \item The classes are balanced (52.5\% vs 47.5\%)
+    \item It provides an intuitive interpretation of model performance
+    \item It is widely used for comparison in classification tasks
+\end{itemize}
+
+\subsubsection{Secondary Metric: Confusion Matrices}
+Confusion matrices provide detailed insight into:
+\begin{itemize}
+    \item True positives and true negatives
+    \item Type I errors (false positives) and Type II errors (false negatives)
+    \item Potential class-specific performance issues
+\end{itemize}

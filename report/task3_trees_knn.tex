@@ -1,0 +1,256 @@
+% Task 3: Decision Trees and KNN
+% ============================================================================
+\section{Task 3: Decision Trees and KNN Comparison}
+% ============================================================================
+
+This section presents the training, evaluation, and comparison of Decision Tree and K-Nearest Neighbors classifiers, along with hyperparameter optimization.
+
+\subsection{Baseline: Dummy Classifier}
+
+A Dummy classifier using the ``most\_frequent'' strategy provides a baseline that any real model should beat. This classifier always predicts the majority class.
+
+\begin{table}[H]
+\centering
+\caption{Dummy Classifier Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Strategy & Most frequent \\
+Accuracy & 52.55\% \\
+Training time & 0.03s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: Dummy Classifier}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 1156 & 0 \\
+\textbf{Actual Yes} & 1044 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The baseline accuracy of 52.55\% reflects the majority class proportion, confirming the balanced dataset analysis from Task 1.
+
+\subsection{Decision Trees}
+
+\subsubsection{Default Hyperparameters}
+
+Decision Tree with scikit-learn's default parameters:
+
+\begin{table}[H]
+\centering
+\caption{Decision Tree (Default) Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Accuracy & 79.86\% \\
+Training time & 0.09s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: Decision Tree (Default)}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 954 & 202 \\
+\textbf{Actual Yes} & 241 & 803 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Hyperparameter Tuning}
+
+GridSearchCV was used to tune the Decision Tree with the following parameter grid:
+
+\begin{lstlisting}[language=Python, caption=Decision Tree Parameter Grid]
+param_grid = {
+    'max_depth': [3, 5, 10, 15, None],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'criterion': ['gini', 'entropy']
+}
+# Total: 90 combinations x 3 folds = 270 fits
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Decision Tree (Tuned) Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Test Accuracy & 82.95\% \\
+CV Mean (±std) & 81.44\% (±0.18\%) \\
+HPO Time & 4.27s \\
+\midrule
+\texttt{max\_depth} & 10 \\
+\texttt{min\_samples\_split} & 5 \\
+\texttt{min\_samples\_leaf} & 1 \\
+\texttt{criterion} & gini \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: Decision Tree (Tuned)}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 984 & 172 \\
+\textbf{Actual Yes} & 203 & 841 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{K-Nearest Neighbors (KNN)}
+
+\subsubsection{Pipeline Construction}
+
+KNN requires preprocessing through a pipeline that includes:
+\begin{itemize}
+    \item Numerical features: Imputation (median) + Scaling
+    \item Categorical features: Imputation (most frequent) + One-hot encoding
+    \item pdays: Custom transformer (binary flag + transformed continuous)
+\end{itemize}
+
+\subsubsection{Scaling Method Comparison}
+
+Two scaling methods were compared using 3-fold cross-validation:
+
+\begin{table}[H]
+\centering
+\caption{Scaler Comparison for KNN}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Scaler} & \textbf{CV Accuracy} & \textbf{CV Std} & \textbf{CV Time} \\
+\midrule
+StandardScaler & \textbf{79.80\%} & ±0.67\% & 1.84s \\
+MinMaxScaler & 73.74\% & ±0.01\% & 1.18s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Selected scaler: StandardScaler} (+6.06 percentage points over MinMaxScaler)
+
+StandardScaler significantly outperforms MinMaxScaler for this dataset. This is likely because:
+\begin{itemize}
+    \item StandardScaler is more robust to outliers in the numerical features
+    \item The z-score normalization better preserves the relative distances important for KNN
+\end{itemize}
+
+\subsubsection{Default Hyperparameters}
+
+KNN with default parameters (k=5) and StandardScaler:
+
+\begin{table}[H]
+\centering
+\caption{KNN (Default) Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Accuracy & 81.18\% \\
+Training time & 0.03s \\
+Scaler & StandardScaler \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: KNN (Default)}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 985 & 171 \\
+\textbf{Actual Yes} & 243 & 801 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Hyperparameter Tuning}
+
+GridSearchCV was used to tune KNN:
+
+\begin{lstlisting}[language=Python, caption=KNN Parameter Grid]
+param_grid = {
+    'n_neighbors': [3, 5, 7, 11, 15, 21],
+    'weights': ['uniform', 'distance'],
+    'metric': ['euclidean', 'manhattan', 'minkowski']
+}
+# Total: 36 combinations x 3 folds = 108 fits
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{KNN (Tuned) Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Test Accuracy & 82.18\% \\
+CV Mean (±std) & 81.06\% (±0.38\%) \\
+HPO Time & 11.75s \\
+\midrule
+\texttt{n\_neighbors} & 11 \\
+\texttt{weights} & distance \\
+\texttt{metric} & euclidean \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: KNN (Tuned)}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 997 & 159 \\
+\textbf{Actual Yes} & 233 & 811 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Comparison Results}
+
+\begin{table}[H]
+\centering
+\caption{Model Comparison Summary}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Model} & \textbf{Test Accuracy} & \textbf{CV Mean} & \textbf{Train Time} \\
+\midrule
+Dummy (baseline) & 52.55\% & -- & 0.03s \\
+Decision Tree (default) & 79.86\% & -- & 0.09s \\
+\textbf{Decision Tree (tuned)} & \textbf{82.95\%} & 81.44\% & 4.27s \\
+KNN (default) & 81.18\% & -- & 0.03s \\
+KNN (tuned) & 82.18\% & 81.06\% & 11.75s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item All models significantly outperform the dummy baseline
+    \item StandardScaler is the preferred scaler for KNN (+6.06\% over MinMaxScaler)
+    \item Hyperparameter optimization improves both models
+    \item \textbf{Best model:} Decision Tree (tuned) at 82.95\%, outperforming KNN (tuned) at 82.18\%
+    \item Decision Tree is preferred for Task 4 due to better accuracy, faster training, and interpretability
+\end{itemize}

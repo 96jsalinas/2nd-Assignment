@@ -1,0 +1,101 @@
+% Main Report - Advanced Programming 2nd Assignment
+% Bank Marketing Dataset - Classification Analysis
+% Student ID: 100562234
+
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    showspaces=false,
+    showstringspaces=false,
+    frame=single,
+    breaklines=true
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+% Title information
+\title{Advanced Programming - 2nd Assignment\\
+\large Bank Marketing Dataset Classification Analysis}
+\author{Josu Salinas Colina}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% ============================================================================
+\section{Introduction}
+% ============================================================================
+
+\subsection{Project Overview}
+The objective of this project is to analyze the Bank Marketing dataset to predict whether a client will subscribe to a term deposit. The dataset consists of data from direct marketing campaigns of a Portuguese banking institution. This analysis is performed in the context of the Advanced Programming assignment, using Student ID 100562234 as the random seed.
+
+\subsection{Use of AI}
+\subsubsection{AI-Assisted Project Scaffolding}
+The initial structure of this project was created using Claude Opus 4.5 (Thinking), an advanced AI assistant. The process followed these steps:
+
+\begin{enumerate}
+    \item \textbf{Requirements Documentation:} A detailed \texttt{requirements.MD} file was first created manually, capturing all the specific requirements for the assignment, including the five main tasks, evaluation metrics, preprocessing guidelines, and general project constraints.
+    
+    \item \textbf{AI-Assisted Scaffolding:} Using a conversational interface with Claude Opus 4.5, the AI was provided with the requirements document and the existing data folder structure. The explicit instruction was to create only the barebones project structure---placeholder files with proper organization and TODO markers---without implementing any actual functionality.
+    
+    \item \textbf{Generated Structure:} The AI created the complete project scaffold, including:
+    \begin{itemize}
+        \item Python source files (\texttt{src/}) with placeholder functions and docstrings
+        \item \LaTeX{} report files (\texttt{report/}) with section templates
+        \item Supporting files such as \texttt{README.md} and \texttt{.gitignore}
+        \item Directory structure for outputs and figures
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{AI-Assisted Code review and documentation}
+After the code was manually developed the same conversational interface was used to ask for a review of the code, validating the changes and checking for suggestions. Finally, after the code was deemed complete and correct, the same system was used to generate code comments and descriptions of the whole project. This was particularly useful for tedious tasks such as proper formatting of outputs. AI was also used to aid in generating the code that generates the graph of the decision tree that is used in this report.
+
+\subsubsection{AI review of report}
+This same report was provided to the same AI assistant to validate the report and check for suggestions, the source \LaTeX code was provided in the same repository as the whole project so that the AI assistant could have access to the whole context, including the ability to read the output of the python script.
+
+
+% ============================================================================
+% Include task-specific sections
+% ============================================================================
+\input{task1_eda}
+\input{task2_evaluation}
+\input{task3_trees_knn}
+\input{task4_results}
+\input{task5_open_choice}
+\input{task6_feature_selection}
+
+\end{document}

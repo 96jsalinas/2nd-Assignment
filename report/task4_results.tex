@@ -1,0 +1,127 @@
+% Task 4: Results and Final Model
+% ============================================================================
+\section{Task 4: Results and Final Model}
+% ============================================================================
+
+This section details the selection of the best model, its evaluation on the test set, and the generation of predictions for the competition dataset.
+
+\subsection{Best Model Selection}
+
+Based on the comparison in Task 3, the \textbf{Decision Tree (Tuned)} was selected as the final model.
+
+\begin{table}[H]
+\centering
+\caption{Selected Model: Decision Tree (Tuned)}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Test Accuracy & 82.95\% \\
+Training Time & 4.27s \\
+Complexity & Moderate (Depth=10) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The Decision Tree was chosen over KNN because:
+\begin{enumerate}
+    \item \textbf{Higher Accuracy:} Decision Tree (82.95\%) outperforms KNN (82.18\%).
+    \item \textbf{Efficiency:} It trains and optimizes significantly faster (4.27s vs 11.75s for HPO).
+    \item \textbf{Inference Speed:} Decision Trees provide faster predictions than KNN, which scales linearly with dataset size.
+    \item \textbf{Interpretability:} The tree structure allows for easier explanation of decision rules compared to distance-based neighbors.
+\end{enumerate}
+
+\subsection{Outer Evaluation (Test Set)}
+
+The outer evaluation on the held-out test set (2,200 samples) confirms the model's ability to generalize:
+
+\begin{itemize}
+    \item \textbf{Accuracy:} 82.95\%
+    \item \textbf{Performance vs Baseline:} +30.40 percentage points over the Dummy classifier (52.55\%).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix: Final Model (Test Set)}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicted No} & \textbf{Predicted Yes} \\
+\midrule
+\textbf{Actual No} & 984 & 172 \\
+\textbf{Actual Yes} & 203 & 841 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Final Model Training}
+
+To maximize performance for the competition, the final model was retrained on the full dataset (combining training and test sets).
+
+\begin{table}[H]
+\centering
+\caption{Final Feature Space}
+\begin{tabular}{lr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Total Instances & 11,000 \\
+Original Features & 16 \\
+Transformed Features & 53 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The final pipeline consists of:
+\begin{enumerate}
+    \item \textbf{Preprocessing:} ColumnTransformer (Imputation, Scaling, Encoding, Pdays transformation).
+    \item \textbf{Classifier:} DecisionTreeClassifier with optimized hyperparameters:
+    \begin{itemize}
+        \item \texttt{criterion='entropy'}
+        \item \texttt{max\_depth=10}
+        \item \texttt{min\_samples\_split=10}
+        \item \texttt{min\_samples\_leaf=2}
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Decision Tree Visualization}
+
+One of the key advantages of Decision Trees is their interpretability. Figure~\ref{fig:decision_tree} shows the top levels of the trained decision tree, illustrating how the model makes classification decisions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/decision_tree_simple.png}
+\caption{Decision Tree Structure (Top 3 Levels). The tree uses features like \texttt{duration} (call duration) and \texttt{poutcome} (previous campaign outcome) as primary splitting criteria. Colors indicate class predictions (orange for ``no'', blue for ``yes'').}
+\label{fig:decision_tree}
+\end{figure}
+
+The full tree has a depth of 10 with 245 leaf nodes, trained on 53 transformed features. The visualization demonstrates how the model can be interpreted to understand which features drive predictions.
+
+\subsection{Competition Predictions}
+
+Predictions were generated for the \texttt{bank\_competition.pkl} dataset (162 instances) using the retrained final model.
+
+\begin{itemize}
+    \item \textbf{Input:} 162 samples, 16 features.
+    \item \textbf{Output:} 162 predictions mapped to original 'yes'/'no' labels.
+    \item \textbf{File:} \texttt{outputs/competition\_predictions.csv}
+\end{itemize}
+
+The predictions follow the required format (Id, deposit). A sample of the output is shown below:
+
+\begin{table}[H]
+\centering
+\caption{Sample Competition Predictions}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lrlllrrrl}
+\toprule
+\textbf{Id} & \textbf{Age} & \textbf{Job} & \textbf{Marital} & \textbf{Balance} & \textbf{Pdays} & \textbf{Prediction} \\
+\midrule
+5553 & 43 & management & married & 78 & 109 & no \\
+915 & 34 & housemaid & married & 0 & -1 & yes \\
+7652 & 54 & technician & married & 3323 & -1 & no \\
+5065 & 43 & blue-collar & single & -399 & -1 & no \\
+3338 & 35 & blue-collar & married & 262 & 181 & yes \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
