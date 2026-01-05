@@ -76,10 +76,10 @@ The final pipeline consists of:
     \item \textbf{Preprocessing:} ColumnTransformer (Imputation, Scaling, Encoding, Pdays transformation).
     \item \textbf{Classifier:} DecisionTreeClassifier with optimized hyperparameters:
     \begin{itemize}
-        \item \texttt{criterion='entropy'}
+        \item \texttt{criterion='gini'}
         \item \texttt{max\_depth=10}
-        \item \texttt{min\_samples\_split=10}
-        \item \texttt{min\_samples\_leaf=2}
+        \item \texttt{min\_samples\_split=5}
+        \item \texttt{min\_samples\_leaf=1}
     \end{itemize}
 \end{enumerate}
 
